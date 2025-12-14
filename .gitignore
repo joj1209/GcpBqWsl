@@ -1,0 +1,23 @@
+# Google Cloud SDK 설치 파일
+/home/
+
+# 로그 디렉토리
+/log/
+
+# 임시 파일
+.DS_Store
+*.log
+*.tmp
+*~
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# 백업 파일
+*.bak
+*.swp
+*.swo
