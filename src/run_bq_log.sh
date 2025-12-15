@@ -14,7 +14,7 @@ if [ ! -f "$SQL_FILE" ]; then
     exit 1
 fi
 
-# 로그 디렉토리: /log/YYYYMMDD/ (프로젝트 루트의 log 폴더)
+# 로그 디렉토리: /log/YYYYMMDD/
 RUN_DATE="$(date +%Y%m%d)"
 LOG_DIR="log/$RUN_DATE"
 mkdir -p "$LOG_DIR"
@@ -32,20 +32,26 @@ echo "SUCCESS LOG : $OUT_LOG"
 echo "ERROR LOG   : $ERR_LOG"
 echo "----------------------------------------"
 
-# bq 실행: stdout/stderr가 섞여 나오는 경우가 있어서, 항상 합쳐서 임시 파일에 저장한 뒤
-# 성공이면 .log, 실패이면 .log.err로 저장합니다.
+# bq 실행: 출력 전체를 임시 파일로 받고, 성공/실패에 따라 .log 또는 .log.err로 저장
 bq query --use_legacy_sql=false < "$SQL_FILE" > "$TMP_LOG" 2>&1
 exit_code=$?
 
+# 일부 환경/상황에서 bq가 exit_code=0을 반환하더라도, 출력에 에러가 포함될 수 있어
+# 로그 내용을 함께 검사하여 최종 성공/실패를 재판정합니다.
+if [ $exit_code -eq 0 ] && grep -Eiq "(BigQuery error|Error in query operation|Error in query string|^FATAL|Syntax error:|Access Denied|Not found:|Invalid query|invalidQuery|Traceback)" "$TMP_LOG"; then
+    exit_code=1
+fi
+
+# 최종 로그 파일 저장 및 종료 코드 반환
 if [ $exit_code -eq 0 ]; then
     mv -f "$TMP_LOG" "$OUT_LOG"
     rm -f "$ERR_LOG"
     echo "Query executed successfully."
-    exit 0
 else
     mv -f "$TMP_LOG" "$ERR_LOG"
     rm -f "$OUT_LOG"
     echo "Query execution failed."
     echo "Error log saved to: $ERR_LOG"
-    exit $exit_code
 fi
+
+exit $exit_code

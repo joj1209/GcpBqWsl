@@ -8,3 +8,6 @@ curl --verbose -L https://api.githubcopilot.com/_ping
 }
 
 {"github.copilot.editor.enableAutoCompletions": true}.settings.json
+
+
+./src/run_bq.sh ./sql/bq_dw_red_care_sales_03.sql
