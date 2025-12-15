@@ -19,3 +19,12 @@ echo "----------------------------------------"
 
 # bq 실행
 bq query --use_legacy_sql=false < "$SQL_FILE"
+exit_code=$?
+
+if [ $exit_code -eq 0 ]; then
+    echo "Query executed successfully."
+else
+    echo "Query execution failed."
+fi
+
+exit $exit_code
