@@ -6,7 +6,9 @@ import sys
 from pathlib import Path
 from typing import NamedTuple, Optional
 
+
 logger = logging.getLogger(__name__)
+
 
 # ============================
 # Config & Constants
@@ -15,6 +17,7 @@ class Config:
     BASE_DIR = Path("/home/bskim/hc")
     SQL_DIR = BASE_DIR / "sql"
 
+
 # ============================
 # Data Record (Python 3.6 compatible, immutable)
 # ============================
@@ -22,6 +25,7 @@ class ListItem(NamedTuple):
     sql_rel: str
     job_dt: str
     tbl_id: str
+
 
 # ============================
 # Utility Functions
@@ -68,7 +72,7 @@ def setup_logging() -> None:
 
 
 # ============================
-# Main Runner Class
+# Main Runner Class (.list mode)
 # ============================
 class BqJobRunner:
     def __init__(self, list_file: Path):
@@ -128,18 +132,74 @@ class BqJobRunner:
 
 
 # ============================
+# Single SQL runner (.sql mode)
+# ============================
+def resolve_sql_path(arg: str) -> Path:
+    """Resolve a SQL file path from a CLI argument.
+
+    Resolution order:
+    1) Absolute path as-is
+    2) Relative path from current working directory
+    3) Relative path under Config.SQL_DIR (keeps parity with .list mode)
+    """
+    candidate = Path(arg)
+    if candidate.is_absolute():
+        return candidate
+
+    if candidate.exists():
+        return candidate
+
+    return Config.SQL_DIR / candidate
+
+
+def run_single_sql(sql_file: Path) -> int:
+    if not sql_file.exists():
+        logger.error("SQL file not found: %s", sql_file)
+        return 1
+
+    sql_text = sql_file.read_text(encoding="utf-8")
+    logger.info("%s", sql_file)
+
+    placeholders = ["{vs_pgm_id}", "{vs_job_dt}", "{vs_tbl_id}"]
+    remaining = [p for p in placeholders if p in sql_text]
+    if remaining:
+        logger.warning(
+            "SQL contains unsubstituted placeholders %s. "
+            "Single-file .sql mode does not perform substitution; use a .list input to substitute.",
+            remaining,
+        )
+
+    try:
+        run_bq_query(sql_text)
+    except subprocess.CalledProcessError as e:
+        logger.error("bq query failed (exit_code=%s)", e.returncode)
+        return 1
+
+    return 0
+
+
+# ============================
 # Entry Point
 # ============================
 def main() -> int:
     setup_logging()
 
     if len(sys.argv) != 2:
-        logger.error("Usage: python %s <sql.list>", sys.argv[0])
+        logger.error("Usage: python %s <sql.list | sql.sql>", sys.argv[0])
         return 1
 
-    list_file = Path(sys.argv[1])
-    runner = BqJobRunner(list_file)
-    return runner.run()
+    input_path = Path(sys.argv[1])
+    suffix = input_path.suffix.lower()
+
+    if suffix == ".list":
+        runner = BqJobRunner(input_path)
+        return runner.run()
+
+    if suffix == ".sql":
+        return run_single_sql(resolve_sql_path(sys.argv[1]))
+
+    logger.error("Unsupported input file type: %s (expected .list or .sql)", input_path)
+    return 1
 
 
 if __name__ == "__main__":

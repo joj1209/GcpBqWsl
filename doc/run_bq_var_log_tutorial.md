@@ -62,7 +62,31 @@ LIST
 python3 src/run_bq_var_log.py src/list/bq_sample.list
 ```
 
+또는 `.sql` 단일 실행:
+
+```bash
+python3 src/run_bq_var_log.py sql/sample.sql
+```
+
 > 참고: 환경에 따라 `bq query` 실행 권한/프로젝트 설정이 필요합니다.
+
+### 3.0.1 `.sql` 파일 1개만 바로 실행하기
+
+`run_bq_var_log.py`는 입력 파일 확장자에 따라 동작이 다릅니다.
+
+- `.list` : 여러 SQL을 파라미터 치환 후 실행(기존 방식)
+- `.sql` : SQL 파일 **1개를 그대로** 실행(파라미터 치환 없음)
+
+예시:
+
+```bash
+python3 src/run_bq_var_log.py sql/sample.sql
+```
+
+주의:
+- `.sql` 모드에서는 `{vs_job_dt}` 같은 템플릿 변수를 **치환하지 않습니다**.
+- SQL에 `{vs_pgm_id}`, `{vs_job_dt}`, `{vs_tbl_id}`가 남아있으면 실행 전에 **WARNING 로그**를 출력합니다.
+
 
 ### 3.1 list 파일 예시
 
@@ -88,6 +112,12 @@ bq_dw_red_care_sales_01.sql 20251225 sales_table
 
 ```bash
 python3 src/run_bq_var_log.py src/list/bq_sample.list
+```
+
+또는 `.sql` 단일 실행:
+
+```bash
+python3 src/run_bq_var_log.py sql/sample.sql
 ```
 
 (회사 환경이 `python`이 3.6이라면 `python src/run_bq_var_log.py ...` 형태로 실행해도 됩니다.)
