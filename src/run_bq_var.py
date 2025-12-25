@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
+import os
 import re
 import subprocess
 import sys
-from dataclasses import dataclass
 from pathlib import Path
+from typing import NamedTuple, Optional
+
 
 BASE_DIR = Path("/home/bskim/hc")
 
 
-@dataclass(frozen=True)
-class ListItem:
+class ListItem(NamedTuple):
     sql_rel: str
     job_dt: str
     tbl_id: str
@@ -20,7 +21,7 @@ def quote_bq_string(value: str) -> str:
     return "'" + value.replace("'", "''") + "'"
 
 
-def parse_list_line(line: str) -> ListItem | None:
+def parse_list_line(line: str) -> Optional[ListItem]:
     line = line.strip()
     if not line or line.startswith("#"):
         return None
@@ -29,7 +30,12 @@ def parse_list_line(line: str) -> ListItem | None:
     if len(parts) < 3:
         raise ValueError(f"Invalid list line (need: <sql> <job_dt> <tbl_id>): {line}")
 
-    return ListItem(sql_rel=parts[0], job_dt=parts[1], tbl_id=parts[2])
+    sql_rel, job_dt, tbl_id = parts[0], parts[1], parts[2]
+    return ListItem(sql_rel=sql_rel, job_dt=job_dt, tbl_id=tbl_id)
+
+
+def load_sql(sql_path: Path) -> str:
+    return sql_path.read_text(encoding="utf-8")
 
 
 def substitute_sql(template: str, *, pgm_id: str, job_dt: str, tbl_id: str) -> str:
@@ -44,7 +50,7 @@ def run_bq(sql_text: str) -> None:
     subprocess.run(
         ["bq", "query", "--quiet", "--use_legacy_sql=false"],
         input=sql_text,
-        text=True,
+        universal_newlines=True,
         check=True,
     )
 
@@ -76,8 +82,7 @@ def main() -> int:
                 continue
 
             pgm_id = Path(item.sql_rel).stem
-            template = sql_path.read_text(encoding="utf-8")
-            sql_text = substitute_sql(template, pgm_id=pgm_id, job_dt=item.job_dt, tbl_id=item.tbl_id)
+            sql_text = substitute_sql(load_sql(sql_path), pgm_id=pgm_id, job_dt=item.job_dt, tbl_id=item.tbl_id)
 
             total += 1
             print(f"[INFO] {item.sql_rel} (job_dt={item.job_dt}, tbl_id={item.tbl_id})")

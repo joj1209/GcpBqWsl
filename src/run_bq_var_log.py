@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
+import logging
 import re
 import subprocess
 import sys
 from pathlib import Path
 from typing import NamedTuple, Optional
 
+logger = logging.getLogger(__name__)
 
 # ============================
 # Config & Constants
@@ -12,7 +14,6 @@ from typing import NamedTuple, Optional
 class Config:
     BASE_DIR = Path("/home/bskim/hc")
     SQL_DIR = BASE_DIR / "sql"
-
 
 # ============================
 # Data Record (Python 3.6 compatible, immutable)
@@ -22,12 +23,11 @@ class ListItem(NamedTuple):
     job_dt: str
     tbl_id: str
 
-
 # ============================
 # Utility Functions
 # ============================
 def quote_bq_string(value: str) -> str:
-    """Escape and quote a string for BigQuery SQL"""
+    """Escape and quote a string for BigQuery SQL."""
     return "'" + value.replace("'", "''") + "'"
 
 
@@ -38,7 +38,7 @@ def parse_list_line(line: str) -> Optional[ListItem]:
 
     parts = re.split(r"\s+", line)
     if len(parts) < 3:
-        raise ValueError(f"Invalid line (expected: <sql> <job_dt> <tbl_id>): {line}")
+        raise ValueError("Invalid line (expected: <sql> <job_dt> <tbl_id>): {}".format(line))
 
     return ListItem(sql_rel=parts[0], job_dt=parts[1], tbl_id=parts[2])
 
@@ -60,12 +60,11 @@ def run_bq_query(sql_text: str) -> None:
     )
 
 
-def log_info(message: str) -> None:
-    print(f"[INFO] {message}")
-
-
-def log_fail(message: str) -> None:
-    print(f"[FAIL] {message}")
+def setup_logging() -> None:
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+    )
 
 
 # ============================
@@ -80,7 +79,7 @@ class BqJobRunner:
 
     def run(self) -> int:
         if not self.list_file.exists():
-            log_fail(f"List file not found: {self.list_file}")
+            logger.error("List file not found: %s", self.list_file)
             return 1
 
         for raw_line in self.list_file.read_text(encoding="utf-8", errors="replace").splitlines():
@@ -97,7 +96,7 @@ class BqJobRunner:
 
             sql_path = Config.SQL_DIR / item.sql_rel
             if not sql_path.exists():
-                log_fail(f"SQL file not found: {sql_path}")
+                logger.error("SQL file not found: %s", sql_path)
                 self.fail += 1
                 return
 
@@ -110,31 +109,32 @@ class BqJobRunner:
                 tbl_id=item.tbl_id,
             )
 
-            log_info(f"{item.sql_rel} (job_dt={item.job_dt}, tbl_id={item.tbl_id})")
+            logger.info("%s (job_dt=%s, tbl_id=%s)", item.sql_rel, item.job_dt, item.tbl_id)
             run_bq_query(sql_text)
-            print()
 
             self.success += 1
             self.total += 1
 
         except ValueError as e:
-            log_fail(str(e))
+            logger.error("%s", e)
             self.fail += 1
 
         except subprocess.CalledProcessError as e:
-            log_fail(f"bq query failed (exit_code={e.returncode})")
+            logger.error("bq query failed (exit_code=%s)", e.returncode)
             self.fail += 1
 
     def print_summary(self) -> None:
-        print(f"[SUMMARY] total={self.total}, success={self.success}, fail={self.fail}")
+        logger.info("SUMMARY total=%s, success=%s, fail=%s", self.total, self.success, self.fail)
 
 
 # ============================
 # Entry Point
 # ============================
 def main() -> int:
+    setup_logging()
+
     if len(sys.argv) != 2:
-        print(f"Usage: python {sys.argv[0]} <sql.list>")
+        logger.error("Usage: python %s <sql.list>", sys.argv[0])
         return 1
 
     list_file = Path(sys.argv[1])
