@@ -21,3 +21,6 @@ __pycache__/
 *.bak
 *.swp
 *.swo
+
+# Auto-generated baseline
+src/list/bq.json
