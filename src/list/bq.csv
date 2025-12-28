@@ -1,0 +1,5 @@
+mid,vs_pgm_id,vs_job_dt,vs_tbl_id,use_yn
+qa,bq_dw_red_care_sales_01.sql,20251223,DW.RED_CARE_SALES,Y
+qb,bq_dw_red_care_sales_02.sql,20251223,DW.RED_CARE_SALES,Y
+qb,bq_dw_red_care_sales_03.sql,20251223,DW.RED_CARE_SALES,Y
+qd,bq_dw_red_care_sales_04.sql,20251223,DW.RED_CARE_SALES,Y
