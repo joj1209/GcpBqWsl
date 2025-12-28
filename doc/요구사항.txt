@@ -1,0 +1,9 @@
+새로운 요구사항입니다.
+1.대상프로그램은 py/run_bq_var_json.py (이미 만들어져 있으며 run_bq_var_re.py을 참고하여 복사했습니다.)
+2.src/list/bq.csv 파일을 읽어서 json파일을 만듭니다.csv파일의 헤더가 키입니다.
+3.json파일이 기준정보이며 그 json을 읽어서 run_bq_var_json.py 실행시킬때 케이스는 아래와 같으며
+ -실행 대상은 공통적으로 use_yn=Y 이며, 아규먼트가 없는 정보는 기본적으로 json에 있는 값을 사용합니다. 
+ -case.1: run_bq_var_json.py mid=qa  --> mid가 qa인 sql을 모두 실행
+ -case.2: run_bq_var_json.py vs_pgm_id=bq_dw_red_care_sales_01.sql --> bq_dw_red_care_sales_01.sql 1개만 실행
+ -case.3: run_bq_var_json.py vs_pgm_id=bq_dw_red_care_sales_01.sql vs_job_dt=20251201 --> bq_dw_red_care_sales_01.sql 1개만 실행하고 vs_job_dt에는 20251201 값을 준다.
+ -case.4: run_bq_var_json.py vs_job_dt=20251202 --> vs_job_dt에는 20251202 값을 주며 전체 실행
