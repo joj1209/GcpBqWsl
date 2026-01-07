@@ -7,3 +7,9 @@
  -case.2: run_bq_var_json.py vs_pgm_id=bq_dw_red_care_sales_01.sql --> bq_dw_red_care_sales_01.sql 1개만 실행
  -case.3: run_bq_var_json.py vs_pgm_id=bq_dw_red_care_sales_01.sql vs_job_dt=20251201 --> bq_dw_red_care_sales_01.sql 1개만 실행하고 vs_job_dt에는 20251201 값을 준다.
  -case.4: run_bq_var_json.py vs_job_dt=20251202 --> vs_job_dt에는 20251202 값을 주며 전체 실행
+
+
+새로운 요구사항입니다.
+1.대상프로그램은 py/run_bq_lib_json.py (이미 만들어져 있으며 run_bq_var_json.py을 참고하여 복사했습니다.)
+2.빅쿼리 실행부분만 subprocess.run 에서 client = bigquery.Client() 같이 라이브러리를 빅쿼리를 실행하시오
+3.빅쿼리 실행부분만 변경되고 나머지 코드는 동일합니다.
