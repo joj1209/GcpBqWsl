@@ -1,0 +1,38 @@
+[
+  {
+    "mid": "aw",
+    "pgm_id": "wzaw_서비스내역00.sql",
+    "job_d": "20251223",
+    "target_table": "AW.서비스내역",
+    "job_seq": "",
+    "temp_table": "AWWRK.서비스내역",
+    "use_yn": "Y"
+  },
+  {
+    "mid": "aw",
+    "pgm_id": "wzaw_서비스내역01.sql",
+    "job_d": "20251223",
+    "target_table": "AW.서비스내역",
+    "job_seq": "",
+    "temp_table": "AWWRK.서비스내역",
+    "use_yn": "Y"
+  },
+  {
+    "mid": "bq",
+    "pgm_id": "wzbq_즐겨찾기00.sql",
+    "job_d": "20251223",
+    "target_table": "BQ.즐겨찾기",
+    "job_seq": "",
+    "temp_table": "BQWRK.즐겨찾기",
+    "use_yn": "Y"
+  },
+  {
+    "mid": "bq",
+    "pgm_id": "wzbq_즐겨찾기01.sql",
+    "job_d": "20251223",
+    "target_table": "BQ.즐겨찾기",
+    "job_seq": "",
+    "temp_table": "BQWRK.즐겨찾기",
+    "use_yn": "Y"
+  }
+]

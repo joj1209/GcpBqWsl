@@ -1,0 +1,40 @@
+
+1.신규 프로그램은 ~hc/py/run_bq_com.py 이며 없으면 파일을 만드시오 
+
+2.기준정보 파일은 ~hc/src/env/mid_env.json 입니다.
+ - 프로그램 유형은 dw 와 dm 으로 구분되어 있으며 차이점은 BQ를 실행시에 파라미터가 다릅니다.
+ - DW는 아래와 같이 파라미터 5개이며
+    program_id
+    standard_date
+    target_table
+    job_seq
+    temp_table
+   DM은 아래와 같이 파라미터가 3개입니다.
+    program_id
+    standard_date
+    table_name
+ - job_d에 값이 있으면 bq_sql.json보다 우선순위가 높으며, 없으면 bq_sql.json의 job_d 를 파라미터로 넘겨줍니다.
+ - mid에 따라서 dw와 dm를 구분할 수 있으며 위의 파라미터를 BQ실행시에 params 값을 키로 파라미터로 동적으로 할당합니다.
+ - job_d는 선택값 (있으면 override, 없으면 bq.json 값 유지)
+
+3.프로그램유형이 DW이면 ~hc/src/env/dw/bq_sql.list 파일을 읽어서 json파일을 만듭니다.list파일의 헤더가 키입니다.
+  프로그램유형이 DM이면 ~hc/src/env/dm/bq_sql.list 파일을 읽어서 json파일을 만듭니다.list파일의 헤더가 키입니다.
+
+4.json파일이 기준정보이며 그 json을 읽어서 run_bq_com.py 실행시킬때 케이스는 아래와 같으며
+ -실행 대상은 공통적으로 use_yn=Y 이며, 아규먼트가 없는 정보는 기본적으로 json에 있는 값을 사용합니다. 
+ -파라미터는 key=value로 주며, 최소 파라미터는 1개이며 mid 또는 pgm_id 중 하나는 필수입니다.
+ -case.1: run_bq_com.py mid=qa  --> mid가 qa인 sql을 모두 실행
+ -case.1-1: run_bq_com.py pgm_id=bm/wzaw_공통코드00.sql  --> mid 없이도 1개만 실행
+ -case.2: run_bq_com.py pgm_id=bm/wzaw_공통코드00.sql --> wzaw_공통코드00.sql 1개만 실행
+ -case.3: run_bq_com.py pgm_id=aw/wzaw_서비스내역00.sql job_d=20251201 --> wzaw_서비스내역00.sql 1개만 실행하고 job_d에는 20251201 값을 준다.
+ -case.4: run_bq_com.py mid=dw_all  --> DW 전체 실행
+ -case.5: run_bq_com.py mid=dw_all job_d=20251201 --> DW 전체 실행 + job_d override
+ -case.6: run_bq_com.py mid=dm_all  --> DM 전체 실행
+ -case.7: run_bq_com.py mid=dm_all job_d=20251201 --> DM 전체 실행 + job_d override
+5.파이썬 3.6기준으로 만드시오
+
+6.로거를 사용하여 로그파일을 만드시오
+ -에러가 발생하면 log.err파일을 만드시오 (에러가 없으면 log.err은 만들지 마시오)
+ -로그파일명은 프로그램명_mid_시분초.log입니다.
+ -프로그램전체건수, 실행완료건수, 성공건수, 실패건수 를 출력하고 기록하시오
+ -파라미터 정보도 출력하고 기록하시오

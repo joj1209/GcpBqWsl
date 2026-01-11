@@ -13,3 +13,16 @@
 1.대상프로그램은 py/run_bq_lib_json.py (이미 만들어져 있으며 run_bq_var_json.py을 참고하여 복사했습니다.)
 2.빅쿼리 실행부분만 subprocess.run 에서 client = bigquery.Client() 같이 라이브러리를 빅쿼리를 실행하시오
 3.빅쿼리 실행부분만 변경되고 나머지 코드는 동일합니다.
+
+
+새로운 요구사항입니다.
+1.대상프로그램은 py/run_bq_param.py (새로 만들어야 합니다.)
+2.전체적인 구조는 run_bq_lib_json.py 와 비슷한데 아래와 같은 차이점이 있습니다.
+ - 변수를 파싱해서 매핑하는게 아니라 sql안에 변수가 @가 앞에 있으므로 쿼리를 스트링으로 넘겨주는게 아니라
+   sql파일을 실행하면서 파라미터를 그대로 넘겨주면 됩니다.
+ - 변수는 5개입니다.
+ @program_id
+ @standard_date
+ @target_table
+ @job_seq
+ @temp_table

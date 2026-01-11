@@ -1,0 +1,30 @@
+[
+  {
+    "mid": "bm",
+    "pgm_id": "wzaw_공통코드00.sql",
+    "job_d": "20251223",
+    "tbl_id": "BM.공통코드",
+    "use_yn": "Y"
+  },
+  {
+    "mid": "bm",
+    "pgm_id": "wzaw_공통코드01.sql",
+    "job_d": "20251223",
+    "tbl_id": "BM.공통코드",
+    "use_yn": "Y"
+  },
+  {
+    "mid": "da",
+    "pgm_id": "wzaw_월별사용00.sql",
+    "job_d": "20251223",
+    "tbl_id": "DA.월별사용",
+    "use_yn": "Y"
+  },
+  {
+    "mid": "da",
+    "pgm_id": "wzaw_월별사용01.sql",
+    "job_d": "20251223",
+    "tbl_id": "DA.월별사용",
+    "use_yn": "Y"
+  }
+]

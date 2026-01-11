@@ -1,0 +1,28 @@
+{
+  "dw": {
+    "mids": [
+      "aw",
+      "bq"
+    ],
+    "params": [
+      "program_id",
+      "standard_date",
+      "target_table",
+      "job_seq",
+      "temp_table"
+    ],
+    "job_d": "20260101"
+  },
+  "dm": {
+    "mids": [
+      "bm",
+      "da"
+    ],
+    "params": [
+      "program_id",
+      "standard_date",
+      "table_name"
+    ],
+    "job_d": ""
+  }
+}

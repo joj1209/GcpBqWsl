@@ -1,0 +1,5 @@
+mid,pgm_id,job_d,target_table,job_seq,temp_table,use_yn
+aw,wzaw_서비스내역00.sql,20251223,AW.서비스내역,,AWWRK.서비스내역,Y
+aw,wzaw_서비스내역01.sql,20251223,AW.서비스내역,,AWWRK.서비스내역,Y
+bq,wzbq_즐겨찾기00.sql,20251223,BQ.즐겨찾기,,BQWRK.즐겨찾기,Y
+bq,wzbq_즐겨찾기01.sql,20251223,BQ.즐겨찾기,,BQWRK.즐겨찾기,Y
