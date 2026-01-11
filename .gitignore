@@ -24,3 +24,7 @@ __pycache__/
 
 # Auto-generated baseline
 src/list/bq.json
+
+# Local dev environments
+.venv/
+.vscode/
