@@ -28,3 +28,6 @@ src/list/bq.json
 # Local dev environments
 .venv/
 .vscode/
+
+# Local backup script
+py/run_bq_param_bak.py
