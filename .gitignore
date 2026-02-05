@@ -1,33 +1,10 @@
-# Google Cloud SDK 설치 파일
-/home/
-
-# 로그 디렉토리
-/log/
-
-# 임시 파일
-.DS_Store
-*.log
-*.tmp
-*~
-
 # Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
+*.py[cod]
 
-# 백업 파일
-*.bak
-*.swp
-*.swo
+# Generated outputs
+app/out/
 
-# Auto-generated baseline
-src/list/bq.json
-
-# Local dev environments
-.venv/
-.vscode/
-
-# Local backup script
-py/run_bq_param_bak.py
+# Local/dev-only folders (avoid committing large binaries)
+proc/
+py/dev/
