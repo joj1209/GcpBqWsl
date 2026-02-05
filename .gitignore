@@ -17,3 +17,11 @@ home/
 # Local/dev-only folders (avoid committing large binaries)
 proc/
 py/dev/
+
+# Local notes / experiments (currently untracked)
+doc/요구사항*.txt
+doc/bigquery_substrb_euckr_udf.md
+sql/udf/
+
+# Potentially sensitive local config
+src/list/bq.json
