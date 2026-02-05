@@ -1,9 +1,18 @@
 # Python
 __pycache__/
 *.py[cod]
+.pytest_cache/
+
+# Virtualenv / editor settings
+.venv/
+.vscode/
 
 # Generated outputs
 app/out/
+
+# Local runtime artifacts
+log/
+home/
 
 # Local/dev-only folders (avoid committing large binaries)
 proc/
