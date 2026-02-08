@@ -11,9 +11,11 @@ What is improved vs v3:
 
 Template: app/vrf_template_markers_v2.sql
 Markers (must exist exactly once each):
-- --__METRICS_SELECT__  (line marker)
-- --__WHERE_CLAUSE__    (line marker)
-- --__METRICS_STRUCT__  (line marker)
+- --__METRICS_SELECT__       (line marker)
+- --__WHERE_CLAUSE__         (line marker)
+- --__METRICS_STRUCT__       (line marker)
+- --__METRICS_JSON_SELECT__  (line marker)
+- --__METRICS_JSON_SELECT_TXT__  (line marker)
 
 Python 3.6 compatible.
 """
@@ -192,6 +194,8 @@ def build_blocks(record):
                 where_lines.append("AND %s = PARSE_DATE('%%Y%%m%%d', '%s')" % (col, v_stat_dt))
 
     metrics_struct_lines = []
+    metrics_json_select_lines = []
+
     metric_cols = cnt_cols + sum_cols
     if metric_cols:
         metrics_struct_lines.append(", STRUCT(")
@@ -200,7 +204,14 @@ def build_blocks(record):
             metrics_struct_lines.append("  %s AS %s%s" % (col, col, comma))
         metrics_struct_lines.append(") AS METRICS")
 
-    return metrics_select_lines, where_lines, metrics_struct_lines
+        for col in metric_cols:
+            raw = col
+            if raw.startswith("`") and raw.endswith("`") and len(raw) >= 2:
+                raw = raw[1:-1]
+            raw_sql = raw.replace("'", "''")
+            metrics_json_select_lines.append(", JSON_VALUE(STATS_CNT, '$[''METRICS''][''%s'']') AS %s" % (raw_sql, col))
+
+    return metrics_select_lines, where_lines, metrics_struct_lines, metrics_json_select_lines
 
 
 def render_one(template, record):
@@ -217,12 +228,13 @@ def render_one(template, record):
         "table_ref": normalize_identifier(v_table_name_raw),
     }
 
-    metrics_select_lines, where_lines, metrics_struct_lines = build_blocks(record)
-
+    metrics_select_lines, where_lines, metrics_struct_lines, metrics_json_select_lines = build_blocks(record)
     block_map = {
         "--__METRICS_SELECT__": metrics_select_lines,
         "--__WHERE_CLAUSE__": where_lines,
         "--__METRICS_STRUCT__": metrics_struct_lines,
+        "--__METRICS_JSON_SELECT__": metrics_json_select_lines,
+        "--__METRICS_JSON_SELECT_TXT__": metrics_json_select_lines,
     }
 
     return template.render(scalar_map, block_map)
@@ -247,7 +259,7 @@ def main(argv=None):
     template_text = template_path.read_text(encoding="utf-8", errors="replace")
     template = CompiledMarkerTemplate(
         template_text,
-        marker_names=["--__METRICS_SELECT__", "--__WHERE_CLAUSE__", "--__METRICS_STRUCT__"],
+        marker_names=["--__METRICS_SELECT__", "--__WHERE_CLAUSE__", "--__METRICS_STRUCT__", "--__METRICS_JSON_SELECT__", "--__METRICS_JSON_SELECT_TXT__"],
     )
 
     records = read_table_ini(table_path)
