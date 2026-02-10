@@ -25,3 +25,7 @@ sql/udf/
 
 # Potentially sensitive local config
 src/list/bq.json
+
+# Generated outputs (tests)
+app/out_test/
+app/out_merge_test/

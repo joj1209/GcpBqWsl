@@ -147,6 +147,44 @@ class CompiledMarkerTemplate(object):
         return _RE_PLACEHOLDER.sub(repl, text)
 
 
+def _chunked(items, chunk_size):
+    if chunk_size <= 0:
+        raise ValueError("chunk_size must be positive")
+    for i in range(0, len(items), chunk_size):
+        yield items[i : i + chunk_size]
+
+
+def write_merged_sql(merge_dir, merge_prefix, rendered_items, merge_chunk):
+    """Write merged sql files.
+
+    rendered_items: [(program_name, sql_text), ...]
+    merge_chunk: number of items per merged file
+    """
+
+    merge_chunk = int(merge_chunk)
+    if merge_chunk <= 0:
+        return 0
+
+    merge_dir = Path(merge_dir)
+    merge_dir.mkdir(parents=True, exist_ok=True)
+
+    written = 0
+    for idx, group in enumerate(_chunked(rendered_items, merge_chunk), start=1):
+        out_path = merge_dir / ("%s_%04d.sql" % (merge_prefix, idx))
+        parts = []
+        for program_name, sql_text in group:
+            parts.append("-- BEGIN %s\n" % program_name)
+            parts.append(sql_text)
+            if not sql_text.endswith("\n"):
+                parts.append("\n")
+            parts.append("-- END %s\n\n" % program_name)
+
+        out_path.write_text("".join(parts), encoding="utf-8")
+        written += 1
+
+    return written
+
+
 def build_metric_cols(record):
     metric_sum = yn_is_true(record.get("v_metric_sum_yn"))
     metric_cnt = yn_is_true(record.get("v_metric_cnt_yn"))
@@ -249,6 +287,22 @@ def main(argv=None):
         help="Marker template file",
     )
     parser.add_argument("--out", default=str(Path("app") / "out"), help="Output directory")
+    parser.add_argument(
+        "--merge-dir",
+        default=str(Path("app") / "out_merge"),
+        help="Merged output directory (<=0 chunk disables)",
+    )
+    parser.add_argument(
+        "--merge-prefix",
+        default="vrf_merged",
+        help="Merged output file prefix (files will be <prefix>_0001.sql ...)",
+    )
+    parser.add_argument(
+        "--merge-chunk",
+        type=int,
+        default=100,
+        help="How many generated SQLs to merge into one file (<=0 disables merge)",
+    )
     args = parser.parse_args(argv)
 
     table_path = Path(args.table)
@@ -259,7 +313,13 @@ def main(argv=None):
     template_text = template_path.read_text(encoding="utf-8", errors="replace")
     template = CompiledMarkerTemplate(
         template_text,
-        marker_names=["--__METRICS_SELECT__", "--__WHERE_CLAUSE__", "--__METRICS_STRUCT__", "--__METRICS_JSON_SELECT__", "--__METRICS_JSON_SELECT_TXT__"],
+        marker_names=[
+            "--__METRICS_SELECT__",
+            "--__WHERE_CLAUSE__",
+            "--__METRICS_STRUCT__",
+            "--__METRICS_JSON_SELECT__",
+            "--__METRICS_JSON_SELECT_TXT__",
+        ],
     )
 
     records = read_table_ini(table_path)
@@ -267,6 +327,7 @@ def main(argv=None):
     total = 0
     written = 0
     skipped = 0
+    rendered_items = []
 
     for record in records:
         total += 1
@@ -280,11 +341,19 @@ def main(argv=None):
             skipped += 1
             continue
 
+        sql_text = render_one(template, record)
+
         out_path = out_dir / ("vrf_" + program_name)
-        out_path.write_text(render_one(template, record), encoding="utf-8")
+        out_path.write_text(sql_text, encoding="utf-8")
+        rendered_items.append(("vrf_" + program_name, sql_text))
         written += 1
 
-    print("TOTAL_ROWS=%d WRITTEN=%d SKIPPED=%d OUT_DIR=%s" % (total, written, skipped, str(out_dir)))
+    merged_files = write_merged_sql(args.merge_dir, args.merge_prefix, rendered_items, args.merge_chunk)
+
+    print(
+        "TOTAL_ROWS=%d WRITTEN=%d SKIPPED=%d OUT_DIR=%s MERGED_FILES=%d MERGE_DIR=%s MERGE_CHUNK=%d"
+        % (total, written, skipped, str(out_dir), merged_files, str(Path(args.merge_dir)), int(args.merge_chunk))
+    )
     return 0
 
 
