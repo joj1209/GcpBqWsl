@@ -168,7 +168,7 @@ def apply_filters(records: List[Dict[str, str]], cli_args: Dict[str, str]) -> Li
     # Filter by use_yn=Y (treat missing use_yn as Y)
     filtered = [r for r in records if r.get("use_yn", "Y").upper() == "Y"]
 
-    # Apply mid filter
+    # Apply mid filterread_list_csv
     if "mid" in cli_args:
         target_mid = cli_args["mid"]
         filtered = [r for r in filtered if r.get("mid", "") == target_mid]
