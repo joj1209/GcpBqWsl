@@ -200,8 +200,10 @@ def build_params(program_type, mid_env_section, record, cli_args):
 	if program_type == "dw":
 		target_table = (
 			cli_args.get("target_table") or record.get("target_table") or "").strip() 
-			job_seq.get("job_seq") or record.get("job_seq") or "").strip()
-			# temp_table.get("temp_table") or record.get("temp_table") or "").strip())
+		job_seq = (
+     cli_args.get("job_seq") or record.get("job_seq") or "").strip()
+		temp_table = (
+     cli_args.get("temp_table") or record.get("temp_table") or "").strip()
    
 
 		params.update(
