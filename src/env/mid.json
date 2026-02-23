@@ -1,8 +1,23 @@
 {
+  "dm": {
+    "mids": [
+      "bm",
+      "qa",
+      "qb",
+      "qd",
+      "qx"
+    ],
+    "params": [
+      "program_id",
+      "standard_date",
+      "table_name"
+    ],
+    "job_d": ""
+  }, 
   "dw": {
     "mids": [
       "aw",
-      "bq"
+      "bv","cz","dv","ev","fv","gv","hv","kv","mv"
     ],
     "params": [
       "program_id",
@@ -12,17 +27,5 @@
       "temp_table"
     ],
     "job_d": "20260101"
-  },
-  "dm": {
-    "mids": [
-      "bm",
-      "da"
-    ],
-    "params": [
-      "program_id",
-      "standard_date",
-      "table_name"
-    ],
-    "job_d": ""
-  }
+  }  
 }
